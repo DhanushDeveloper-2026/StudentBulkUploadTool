@@ -399,17 +399,11 @@ def dashboard(request):
         if invalid_rows:
 
             error_df = pd.DataFrame(invalid_rows)
-            os.makedirs(os.path.join(
-                settings.MEDIA_ROOT, "error_reports"),
-                        exist_ok=True,)
+            temp_dir = "/tmp/error_reports"
+            os.makedirs(temp_dir, exist_ok=True)
 
             file_name = f"errors_{uuid.uuid4().hex}.xlsx"
-
-            file_path = os.path.join(
-            settings.MEDIA_ROOT,
-            "error_reports",
-            file_name,
-            )
+            file_path = os.path.join(temp_dir, file_name)
 
             error_df.to_excel(file_path, index=False)
 
