@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Register
+{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f4f7fb 0%, #e9eefc 100%);
+    }
+
+    .register-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .register-card {
+        width: 100%;
+        max-width: 460px;
+        border: 0;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(25, 135, 84, 0.15);
+    }
+
+    .register-header {
+        background: linear-gradient(90deg, #0d6efd, #0d6efd);
+        color: #fff;
+        padding: 22px;
+        text-align: center;
+    }
+
+    .register-header h3 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: .4px;
+    }
+
+    .register-body {
+        background: #ffffff;
+        padding: 28px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid #dbe3f0;
+        transition: .25s;
+    }
+
+    .form-control:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 .2rem rgba(25, 135, 84, .12);
+    }
+
+    .register-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #0d6efd, #0d6efd);
+        transition: .25s;
+    }
+
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(21, 143, 250, 0.886);
+    }
+
+    .register-footer {
+        background: #fff;
+        border-top: 1px solid #eef2f7;
+        text-align: center;
+        padding: 14px 18px;
+    }
+
+    .register-footer a {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .register-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="register-wrapper">
+    <div class="card register-card">
+        <div class="register-header">
+            <h3>Register</h3>
+            <small class="text-white-50">Create your account</small>
+        </div>
+
+        <div class="register-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+    <label>First Name</label>
+    <input
+        type="text"
+        name="first_name"
+        class="form-control"
+        required>
+</div>
+
+<div class="mb-3">
+    <label>Last Name</label>
+    <input
+        type="text"
+        name="last_name"
+        class="form-control"
+        required>
+</div>
+
+<div class="mb-3">
+    <label>Email</label>
+    <input
+        type="email"
+        name="email"
+        class="form-control"
+        required>
+</div>
+
+<div class="mb-3">
+    <label>Password</label>
+    <input
+        type="password"
+        name="password"
+        class="form-control"
+        required>
+</div>
+
+<div class="mb-3">
+    <label>Confirm Password</label>
+    <input
+        type="password"
+        name="confirm_password"
+        class="form-control"
+        required>
+</div>
+
+                <button type="submit" class="btn btn-success register-btn w-100">
+                    Register
+                </button>
+            </form>
+        </div>
+
+        <div class="register-footer">
+            Already have an account?
+            <a href="{% url 'login' %}">Login</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f4f7fb 0%, #e9eefc 100%);
+    }
+
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 430px;
+        border: 0;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 18px 45px rgba(13, 110, 253, 0.15);
+        backdrop-filter: blur(10px);
+    }
+
+    .login-header {
+        background: linear-gradient(90deg, #2d80fd, #2d80fd);
+        color: #fff;
+        padding: 22px;
+        text-align: center;
+    }
+
+    .login-header h3 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: .4px;
+    }
+
+    .login-body {
+        background: #ffffff;
+        padding: 28px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid #dbe3f0;
+        transition: .25s;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .12);
+    }
+
+    .login-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #257bfc, #257bfc);
+        transition: .25s;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(13, 110, 253, .18);
+    }
+
+    .login-footer {
+        background: #fff;
+        border-top: 1px solid #eef2f7;
+        text-align: center;
+        padding: 14px 18px;
+    }
+
+    .login-footer a,
+    .forgot-link {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .login-footer a:hover,
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
+
+    .remember-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    @media (max-width: 576px) {
+        .login-body {
+            padding: 22px;
+        }
+
+        .remember-area {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="card login-card">
+        <div class="login-header">
+            <h3>Login</h3>
+            <small class="text-white-50">Sign in to continue</small>
+        </div>
+
+        <div class="login-body">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                <div class="mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="login"
+                        placeholder="Username or Email"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password <span class="text-danger">*</span></label>
+                    <input
+                        type="password"
+                        class="form-control"
+                        name="password"
+                        placeholder="Enter your password"
+                        required>
+                </div>
+
+                <div class="remember-area mb-4">
+                    <div class="form-check">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="remember">
+                        <label class="form-check-label" for="remember">
+                            Remember Me
+                        </label>
+                    </div>
+
+                    <a href="{% url 'password_reset' %}" class="forgot-link">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn btn-primary login-btn w-100">
+                    Login
+                </button>
+            </form>
+        </div>
+
+        <div class="login-footer">
+            Don't have an account?
+            <a href="{% url 'register' %}">Register</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
