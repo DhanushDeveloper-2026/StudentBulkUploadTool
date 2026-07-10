@@ -31,9 +31,6 @@ ALLOWED_HOSTS = [host.strip() for host in config('ALLOWED_HOST',"").split(",") i
 
 # server Type
 SERVER_TYPE = config('SERVER_TYPE')
-PRODUCTION = config('PRODUCTION')
-
-
 
 # Application definition
 

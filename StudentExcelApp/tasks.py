@@ -21,7 +21,7 @@ def send_invalid_records_email(user_email, excel_path, upload_id):
     )
     
     # Deciding recipient.
-    if settings.SERVER_TYPE == "PRODUCTION":
+    if settings.SERVER_TYPE == "DEMO":
         recipients = [user_email]
     else:
         recipients = ['dhanusharumugam245@gmail.com']
