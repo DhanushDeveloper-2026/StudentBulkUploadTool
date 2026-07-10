@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import urllib.parse
 from pathlib import Path
 import os
 from decouple import config
@@ -33,8 +33,7 @@ ALLOWED_HOSTS = [host.strip() for host in config('ALLOWED_HOST',"").split(",") i
 SERVER_TYPE = config('SERVER_TYPE')
 PRODUCTION = config('PRODUCTION')
 
-DEV = "DEV"
-UAT = "UAT"
+
 
 # Application definition
 
@@ -81,7 +80,20 @@ WSGI_APPLICATION = 'Studentproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
+if SERVER_TYPE == "DEV":
+    url = urllib.parse.urlparse(config('DATABASE_URL'))
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": url.path.lstrip("/"),
+            "USER": url.username,
+            "PASSWORD": url.password,
+            "HOST": url.hostname,
+            "PORT": url.port,
+        }
+    }
+else:
+    DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME'),
