@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'Studentproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if SERVER_TYPE == "DEV":
+if SERVER_TYPE == "DEMO":
     url = urllib.parse.urlparse(config('DATABASE_URL'))
     DATABASES = {
         "default": {
