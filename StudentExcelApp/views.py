@@ -398,22 +398,13 @@ def dashboard(request):
         # Send invalid records through email
         if invalid_rows:
 
-            error_df = pd.DataFrame(invalid_rows)
-            temp_dir = "/tmp/error_reports"
-            os.makedirs(temp_dir, exist_ok=True)
-
-            file_name = f"errors_{uuid.uuid4().hex}.xlsx"
-            file_path = os.path.join(temp_dir, file_name)
-
-            error_df.to_excel(file_path, index=False)
-
             related_id = upload.id if upload else 0
 
             send_invalid_records_email.delay(
-            request.user.email,
-            file_path,
-            related_id,
-            )                                                        
+                request.user.email,
+                invalid_rows,
+                related_id,
+            )                                      
 
         if invalid_rows and valid_students:
             messages.warning(
