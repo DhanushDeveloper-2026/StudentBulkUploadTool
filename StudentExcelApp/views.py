@@ -695,3 +695,9 @@ def download_template(request):
         as_attachment=True,
         filename="Student_Template.xlsx",
     )
+    
+    
+# CELERY_BROKER_URL=rediss://default:gQAAAAAAAn2wAAIgcDFlMzliNDc4ODk5NDI0NWQ3YjlhNTY0YzdiOTUwMWE2Nw@sought-iguana-163248.upstash.io:6379/0
+
+# CELERY_RESULT_BACKEND=rediss://default:gQAAAAAAAn2wAAIgcDFlMzliNDc4ODk5NDI0NWQ3YjlhNTY0YzdiOTUwMWE2Nw@sought-iguana-163248.upstash.io:6379/1
+
