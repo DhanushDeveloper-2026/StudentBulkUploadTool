@@ -89,9 +89,6 @@ if SERVER_TYPE == "DEMO":
             "PASSWORD": url.password,
             "HOST": url.hostname,
             "PORT": url.port,
-            "OPTIONS": {
-            "sslmode": "require",
-            },
         }
     }
 else:
@@ -182,12 +179,12 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # celery Settings
 
-CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+# CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 
-CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
+# CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
 
-CELERY_ACCEPT_CONTENT = ["json"]
+# CELERY_ACCEPT_CONTENT = ["json"]
 
-CELERY_TASK_SERIALIZER = "json"
+# CELERY_TASK_SERIALIZER = "json"
 
-CELERY_RESULT_SERIALIZER = "json"
+# CELERY_RESULT_SERIALIZER = "json"

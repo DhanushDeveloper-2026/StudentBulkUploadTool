@@ -400,7 +400,7 @@ def dashboard(request):
 
             related_id = upload.id if upload else 0
 
-            send_invalid_records_email.delay(
+            send_invalid_records_email(
                 request.user.email,
                 invalid_rows,
                 related_id,

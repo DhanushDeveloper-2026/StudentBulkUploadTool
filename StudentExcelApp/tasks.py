@@ -1,5 +1,4 @@
 import os
-from celery import shared_task
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.mail import EmailMultiAlternatives
@@ -8,9 +7,9 @@ from .models import EmailLog
 import uuid
 import pandas as pd
 from .models import UploadFile
+import tempfile
 
 
-@shared_task
 def send_invalid_records_email(user_email, invalid_rows, upload_id):
 
     subject = "Invalid Student Records"
@@ -24,14 +23,12 @@ def send_invalid_records_email(user_email, invalid_rows, upload_id):
     )
 
     # Create a temporary folder
-    temp_dir = "/tmp/error_reports"
+    temp_dir = os.path.join(tempfile.gettempdir(), "error_reports")
     os.makedirs(temp_dir, exist_ok=True)
 
-    # Generate a unique file name
     file_name = f"errors_{uuid.uuid4().hex}.xlsx"
     excel_path = os.path.join(temp_dir, file_name)
 
-    # Create Excel file from invalid rows
     error_df = pd.DataFrame(invalid_rows)
     error_df.to_excel(excel_path, index=False)
 
