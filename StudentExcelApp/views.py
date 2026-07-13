@@ -133,7 +133,25 @@ def register(request):
         if not re.fullmatch(r"[A-Za-z ]+", last_name):
             messages.error(request, "Last name should contain only letters.")
             return redirect("register")
+        
+        username = email.split("@")[0]
 
+        # Username must be at least 6 characters
+        if len(username) < 6:
+            messages.error(
+            request,
+            "Username must be at least 6 characters long. Please use an email with a longer username."
+            )
+            return redirect("register")
+
+        username = email.split("@")[0]
+
+        # If username already exists,
+        # append number automatically
+        if User.objects.filter(username=username).exists():
+            messages.error(request,"Username Already Exist")
+            return redirect('register')
+        
         # ------------------------
         # Email Validation
         # ------------------------
@@ -163,7 +181,15 @@ def register(request):
         # ------------------------
         # Password Validation
         # ------------------------
-        
+        if not password:
+            messages.error(request, "Password is required.")
+            return redirect("register")
+
+    # Password should not exceed 12 characters
+        if len(password) > 12:
+            messages.error(request, "Password must not exceed 12 characters.")
+            return redirect("register")
+
 
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
