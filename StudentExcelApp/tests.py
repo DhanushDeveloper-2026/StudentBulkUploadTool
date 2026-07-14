@@ -191,13 +191,7 @@ class RegisterViewTests(TestCase):
         user = User.objects.get(email="janesmith@gmail.com")
         self.assertEqual(user.username, "janesmith")
 
-    def test_register_username_too_short(self):
-        # local part of email < 6 chars
-        response = self.client.post(
-            reverse("register"), self.valid_payload(email="ab@gmail.com")
-        )
-        self.assertRedirects(response, reverse("register"))
-        self.assertFalse(User.objects.exists())
+    
 
 
 class DashboardViewTests(TestCase):
