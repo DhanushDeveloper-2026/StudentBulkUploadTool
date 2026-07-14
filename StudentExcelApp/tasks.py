@@ -10,6 +10,7 @@ from .models import UploadFile
 import tempfile
 
 
+
 def send_invalid_records_email(user_email, invalid_rows, upload_id):
 
     subject = "Invalid Student Records"
