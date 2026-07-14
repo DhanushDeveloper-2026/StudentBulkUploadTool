@@ -118,6 +118,7 @@ def register(request):
         if not first_name:
             messages.error(request, "First name is required.")
             return redirect("register")
+        
 
         if not re.fullmatch(r"[A-Za-z ]+", first_name):
             messages.error(request, "First name should contain only letters.")
@@ -136,15 +137,6 @@ def register(request):
         
         username = email.split("@")[0]
 
-        # Username must be at least 6 characters
-        if len(username) < 6:
-            messages.error(
-            request,
-            "Username must be at least 6 characters long. Please use an email with a longer username."
-            )
-            return redirect("register")
-
-        username = email.split("@")[0]
 
         # If username already exists,
         # append number automatically
