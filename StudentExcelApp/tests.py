@@ -144,6 +144,14 @@ class RegisterViewTests(TestCase):
         self.assertRedirects(response, reverse("register"))
         self.assertFalse(User.objects.exists())
 
+    def test_register_first_name_too_short(self):
+        # First name must be more than 2 characters long.
+        response = self.client.post(
+            reverse("register"), self.valid_payload(first_name="Al")
+        )
+        self.assertRedirects(response, reverse("register"))
+        self.assertFalse(User.objects.exists())
+
     def test_register_disallowed_email_domain(self):
         response = self.client.post(
             reverse("register"), self.valid_payload(email="jane@outlook.com")
@@ -190,8 +198,6 @@ class RegisterViewTests(TestCase):
         )
         user = User.objects.get(email="janesmith@gmail.com")
         self.assertEqual(user.username, "janesmith")
-
-    
 
 
 class DashboardViewTests(TestCase):

@@ -119,6 +119,9 @@ def register(request):
             messages.error(request, "First name is required.")
             return redirect("register")
         
+        if len(first_name)<=2:
+            messages.error(request,"First name Should be greater than 2 characters")
+            return redirect('register')
 
         if not re.fullmatch(r"[A-Za-z ]+", first_name):
             messages.error(request, "First name should contain only letters.")
