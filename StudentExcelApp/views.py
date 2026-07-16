@@ -297,8 +297,21 @@ def dashboard(request):
             return render(request, "dashboard.html", {"uploads": uploads,
                                                       "invalid_rows" : invalid_rows})
 
-        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "").str.replace("*","")
+        df.columns = (df.columns.str.strip().str.lower().str.replace(" ", "",regex=False).str.replace("*","",regex=False))
         
+        expected_columns = [
+            "studentid",
+            "studentname",
+            "email",
+            "course",
+        "department",
+        ]
+
+        missing_columns = [col for col in expected_columns if col not in df.columns]
+
+        if missing_columns:
+            messages.error(request,f"Missing required columns: {', '.join(missing_columns)}")
+            return render(request,"dashboard.html",{"uploads": uploads,"invalid_rows": invalid_rows,})
         
         # validating the exact column order also should be same in the excel sheet   
         # if list(df.columns) != expected_columns:
