@@ -468,7 +468,8 @@ def dashboard(request):
                 for student in valid_students:
                     student.upload = upload
                 Student.objects.bulk_create(valid_students, batch_size=500)
-            
+                
+
         
         # Send invalid records through email
         if invalid_rows:
