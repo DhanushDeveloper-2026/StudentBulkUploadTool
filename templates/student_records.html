@@ -98,6 +98,8 @@ Student Records
                     <th>Email</th>
                     <th>Course</th>
                     <th>Department</th>
+                    <th>Institution</th>
+                    <th>City</th>
                     <th width="180">Action</th>
                 </tr>
             </thead>
@@ -111,6 +113,8 @@ Student Records
                     <td>{{ student.email }}</td>
                     <td>{{ student.course }}</td>
                     <td>{{ student.department }}</td>
+                    <td>{{ student.institution|default:"-" }}</td>
+                    <td>{{ student.city|default:"-" }}</td>
                     <td>
                         <button
                             class="btn btn-primary text-light btn-sm"

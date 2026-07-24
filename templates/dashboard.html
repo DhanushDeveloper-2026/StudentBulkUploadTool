@@ -219,6 +219,34 @@ Dashboard
         </div>
     </section>
 
+<!-- <form method="POST"
+      action="{% url 'send_bulk_email' %}"
+      enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">
+            Select Email Excel File
+        </label>
+
+        <input
+            type="file"
+            name="email_excel"
+            class="form-control form-control-lg"
+            accept=".xlsx,.xls"
+            required>
+    </div>
+
+    <div class="text-end mb-3">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-send"></i>
+            Upload & Send Emails
+        </button>
+    </div>
+
+</form> -->
+
     {% if uploads %}
     <div class="row g-3 mb-4">
         <div class="col-md-4">
@@ -295,6 +323,7 @@ Dashboard
                 </table>
             </div>
         </div>
+        <div id="pagination" class="d-flex justify-content-center mt-3"></div>
     </div>
     {% endif %}
 
@@ -399,7 +428,7 @@ Dashboard
                     <!-- File Upload -->
                     <label class="form-label fw-semibold">
                         Select Excel File
-                    </label>
+                     </label>
 
                     <input
                         type="file"
@@ -433,16 +462,132 @@ Dashboard
 </div>
 <script>
 $(document).ready(function () {
-    $("#toggleTable").click(function () {
-        if ($(this).text().trim() === "Show Errors") {
-            $("#invalidRowsTable").slideDown(400);
-            $(this).text("Hide Errors").removeClass("btn-light").addClass("btn-secondary");
-        } else {
-            $("#invalidCard").fadeOut(500, function () {
-                $("#emailSuccessMessage").removeClass("d-none").addClass("show");
-            });
+
+    // =========================
+    // Pagination
+    // =========================
+    const rowsPerPage = 10;
+    const rows = $("#invalidRowsTable tbody tr");
+    const pageCount = Math.ceil(rows.length / rowsPerPage);
+    let currentPage = 1;
+
+    function showPage(page) {
+
+        rows.hide();
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.slice(start, end).show();
+
+        $("#pagination .page-item").removeClass("active");
+        $("#page-" + page).addClass("active");
+    }
+
+    if (pageCount > 1) {
+
+        let html = '<ul class="pagination">';
+
+        html += `
+            <li class="page-item">
+                <a href="#" class="page-link" id="prev">Previous</a>
+            </li>
+        `;
+
+        for (let i = 1; i <= pageCount; i++) {
+
+            html += `
+                <li class="page-item" id="page-${i}">
+                    <a href="#" class="page-link page-number">${i}</a>
+                </li>
+            `;
         }
+
+        html += `
+            <li class="page-item">
+                <a href="#" class="page-link" id="next">Next</a>
+            </li>
+        `;
+
+        html += "</ul>";
+
+        $("#pagination").html(html);
+
+        showPage(currentPage);
+
+        $(document).on("click", ".page-number", function(e){
+
+            e.preventDefault();
+
+            currentPage = Number($(this).text());
+
+            showPage(currentPage);
+
+        });
+
+        $("#prev").click(function(e){
+
+            e.preventDefault();
+
+            if(currentPage > 1){
+
+                currentPage--;
+
+                showPage(currentPage);
+
+            }
+
+        });
+
+        $("#next").click(function(e){
+
+            e.preventDefault();
+
+            if(currentPage < pageCount){
+
+                currentPage++;
+
+                showPage(currentPage);
+
+            }
+
+        });
+
+    } else {
+
+        rows.show();
+
+    }
+
+
+    // =========================
+    // Show / Hide Errors
+    // =========================
+    $("#toggleTable").click(function () {
+
+        if ($(this).text().trim() === "Show Errors") {
+
+            $("#invalidRowsTable").slideDown(400);
+
+            $(this)
+                .text("Hide Errors")
+                .removeClass("btn-light")
+                .addClass("btn-secondary");
+
+        } else {
+
+            $("#invalidCard").fadeOut(500, function () {
+
+                $("#emailSuccessMessage")
+                    .removeClass("d-none")
+                    .addClass("show");
+
+            });
+
+        }
+
     });
+
 });
 </script>
 {% endblock %}
