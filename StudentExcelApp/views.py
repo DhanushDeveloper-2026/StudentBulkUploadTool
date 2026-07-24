@@ -20,7 +20,7 @@ from django.utils import timezone
 import os
 import uuid
 from django.conf import settings
-from .tasks import send_invalid_records_email
+from .tasks import send_invalid_records_email,send_bulk_upload_email
 # Downlaod Excel File view.
 #--- Import 
 from django.conf import settings
@@ -55,30 +55,53 @@ def login_page(request):
         login_input = request.POST.get("login", "").strip()
         password = request.POST.get("password")
 
-        username = login_input
+        user_obj = None
 
-        # User entered email
+        # Login using Email
         if "@" in login_input:
-
             try:
-                user = User.objects.get(email__iexact=login_input)
-                username = user.username
+                user_obj = User.objects.get(email__iexact=login_input)
             except User.DoesNotExist:
-                username = login_input
+                pass
 
+        # Login using Username
+        else:
+            try:
+                user_obj = User.objects.get(username__iexact=login_input)
+            except User.DoesNotExist:
+                pass
+
+        # ---------------------------
+        # Username / Email not found
+        # ---------------------------
+        if not user_obj:
+
+            LoginHistory.objects.create(
+                username=login_input,
+                status="FAILED",
+                failure_reason="Username or Email does not exist"
+            )
+
+            messages.error(request, "Username or Email does not exist.")
+            return render(request, "login.html")
+
+        # ---------------------------
+        # Check Password
+        # ---------------------------
         user = authenticate(
             request,
-            username=username,
+            username=user_obj.username,
             password=password
         )
 
         if user:
 
             login(request, user)
-            
+
             LoginHistory.objects.create(
                 user=user,
-                username=user.username
+                username=user.username,
+                status="SUCCESS"
             )
 
             next_url = request.POST.get("next") or request.GET.get("next")
@@ -91,10 +114,19 @@ def login_page(request):
                 return redirect(next_url)
 
             return redirect("dashboard")
-        
-        LoginHistory.objects.create(username=login_input,status="FAILED",failure_reason="Invalid username or password")
-        messages.error(request, "Invalid Email or Password.")
-    
+
+        # ---------------------------
+        # Password Incorrect
+        # ---------------------------
+        LoginHistory.objects.create(
+            user=user_obj,
+            username=user_obj.username,
+            status="FAILED",
+            failure_reason="Incorrect password"
+        )
+
+        messages.error(request, "Incorrect password.")
+
     return render(request, "login.html")
 
 # Register Page VIew
@@ -264,7 +296,7 @@ def dashboard(request):
     .filter(total_records__gt=0)
     .order_by("-uploaded_at")
     )
-    invalid_rows = request.session.pop("invalid_rows", [])
+    invalid_rows = request.session.get("invalid_rows", [])
     expected_columns = [
         "studentid*",
         "studentname*",
@@ -275,6 +307,13 @@ def dashboard(request):
 
     if request.method == "POST":
         excel_file = request.FILES.get("excel_file")
+        email_excel = request.FILES.get("email_excel")
+        
+        if not email_excel:
+            messages.error(request, "Please choose the Email Excel file.")
+            return redirect("dashboard")
+        
+        
 
         if not excel_file:
             messages.error(request, "Please choose an Excel file.")
@@ -342,6 +381,12 @@ def dashboard(request):
             email = "" if pd.isna(row["email"]) else str(row["email"]).strip()
             course = "" if pd.isna(row["course"]) else str(row["course"]).strip()
             department = "" if pd.isna(row["department"]) else str(row["department"]).strip()
+            institution = ""
+            if "institution" in df.columns:
+                institution = "" if pd.isna(row["institution"]) else str(row["institution"]).strip()
+            city = ""
+            if "city" in df.columns:
+                city = "" if pd.isna(row["city"]) else str(row["city"]).strip()
 
             base_row = {
                 "row": row_number,
@@ -414,6 +459,8 @@ def dashboard(request):
                     email=email,
                     course=course,
                     department=department,
+                    institution=institution,
+                    city=city
                 )
             )
 
@@ -429,6 +476,31 @@ def dashboard(request):
                     student.upload = upload
                 Student.objects.bulk_create(valid_students, batch_size=500)
                 
+        # email Excel mail sending.
+                
+        email_df = pd.read_excel(email_excel)
+
+        email_df.columns = (email_df.columns.str.strip().str.lower())
+        
+        required = ["name", "email"]
+
+        missing = [c for c in required if c not in email_df.columns]
+
+        if missing:
+            messages.error(request,f"Missing columns in Email Excel: {', '.join(missing)}")
+            return redirect("dashboard")
+        recipients = []
+
+        for _, row in email_df.iterrows():
+
+            name = str(row["name"]).strip()
+            email = str(row["email"]).strip()
+
+            if name and email:
+                recipients.append({"name": name,"email": email})
+        
+        send_bulk_upload_email(request.user.email, upload.id)
+        
         # Send invalid records through email
         if invalid_rows:
 
@@ -438,8 +510,8 @@ def dashboard(request):
                 request.user.email,
                 invalid_rows,
                 related_id,
-            )                                      
-
+            )
+                 
         if invalid_rows and valid_students:
             messages.warning(
                 request,
@@ -735,3 +807,63 @@ def download_template(request):
 
 # CELERY_RESULT_BACKEND=rediss://default:gQAAAAAAAn2wAAIgcDFlMzliNDc4ODk5NDI0NWQ3YjlhNTY0YzdiOTUwMWE2Nw@sought-iguana-163248.upstash.io:6379/1
 
+
+@login_required(login_url="login")
+def send_bulk_email_view(request):
+
+    if request.method != "POST":
+        return redirect("dashboard")
+
+    email_excel = request.FILES.get("email_excel")
+    print(email_excel)
+    if not email_excel:
+        messages.error(request, "Please select an Excel file.")
+        return redirect("dashboard")
+
+    try:
+        df = pd.read_excel(email_excel)
+        print(df)
+    except Exception:
+        messages.error(request, "Unable to read the Excel file.")
+        return redirect("dashboard")
+
+    df.columns = (
+        df.columns
+        .str.strip()
+        .str.lower()
+    )
+
+    required_columns = ["name", "email"]
+
+    missing = [c for c in required_columns if c not in df.columns]
+
+    if missing:
+        messages.error(
+            request,
+            f"Missing columns: {', '.join(missing)}"
+        )
+        return redirect("dashboard")
+
+    recipients = []
+
+    for _, row in df.iterrows():
+
+        name = str(row["name"]).strip()
+        email = str(row["email"]).strip()
+
+        if name and email:
+            recipients.append({
+                "name": name,
+                "email": email,
+            })
+
+    if not recipients:
+        messages.error(request, "No valid recipients found.")
+        return redirect("dashboard")
+
+    
+    send_bulk_upload_email(recipients, upload_id=0)
+
+    messages.success(request, "Emails sent successfully.")
+
+    return redirect("dashboard")

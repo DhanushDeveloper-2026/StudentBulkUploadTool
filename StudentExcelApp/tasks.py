@@ -8,6 +8,7 @@ import uuid
 import pandas as pd
 from .models import UploadFile
 import tempfile
+import traceback
 
 
 def send_invalid_records_email(user_email, invalid_rows, upload_id):
@@ -120,3 +121,58 @@ def send_invalid_records_email(user_email, invalid_rows, upload_id):
 #     )
 
 #     message.send()
+
+def send_bulk_upload_email(recipients, upload_id):
+    print("IM entering mail send")
+    subject = "Engineering Solutions That Drive Innovation"
+
+    for person in recipients:
+        print(person['name'],person['email'])
+        html_content = render_to_string(
+            "email_template.html",
+            {
+                "name": person["name"],
+                "user_email": person["email"],
+            }
+        )
+
+        text_content = f"""
+Dear {person['name']},
+
+Engineering Solutions That Drive Innovation.
+"""
+
+        try:
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[person["email"]],
+            )
+
+            email.attach_alternative(html_content, "text/html")
+            print(f"Sending mail to {person['email']}")
+            email.send(fail_silently=False)
+            print(f"Sent successfully to {person['email']}")
+
+            EmailLog.objects.create(
+                to_email=person["email"],
+                subject=subject,
+                email_status="sent",
+                related_object_id=upload_id,
+            )
+
+        except Exception as e:
+            
+            
+            print("=" * 80)
+            print("EMAIL ERROR")
+            traceback.print_exc()
+            print("=" * 80)
+             
+            EmailLog.objects.create(
+                to_email=person["email"],
+                subject=subject,
+                email_status="failed",
+                related_object_id=upload_id,
+            )

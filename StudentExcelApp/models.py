@@ -7,6 +7,7 @@ class UploadFile(models.Model):
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     filename = models.CharField(max_length=255)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    
 
 
 # Students Models.
@@ -22,6 +23,8 @@ class Student(models.Model):
     email = models.EmailField()
     course = models.CharField(max_length=100)
     department = models.CharField(max_length=100)
+    institution = models.CharField(max_length=200,blank=True,null=True)
+    city = models.CharField(max_length=100,blank=True,null=True)
     
     history = HistoricalRecords()
 
