@@ -219,33 +219,7 @@ Dashboard
         </div>
     </section>
 
-<!-- <form method="POST"
-      action="{% url 'send_bulk_email' %}"
-      enctype="multipart/form-data">
 
-    {% csrf_token %}
-
-    <div class="mb-3">
-        <label class="form-label fw-semibold">
-            Select Email Excel File
-        </label>
-
-        <input
-            type="file"
-            name="email_excel"
-            class="form-control form-control-lg"
-            accept=".xlsx,.xls"
-            required>
-    </div>
-
-    <div class="text-end mb-3">
-        <button type="submit" class="btn btn-primary">
-            <i class="bi bi-send"></i>
-            Upload & Send Emails
-        </button>
-    </div>
-
-</form> -->
 
     {% if uploads %}
     <div class="row g-3 mb-4">

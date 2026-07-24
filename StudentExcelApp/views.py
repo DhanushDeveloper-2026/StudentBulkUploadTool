@@ -20,7 +20,7 @@ from django.utils import timezone
 import os
 import uuid
 from django.conf import settings
-from .tasks import send_invalid_records_email,send_bulk_upload_email
+from .tasks import send_invalid_records_email
 # Downlaod Excel File view.
 #--- Import 
 from django.conf import settings
@@ -307,14 +307,7 @@ def dashboard(request):
 
     if request.method == "POST":
         excel_file = request.FILES.get("excel_file")
-        email_excel = request.FILES.get("email_excel")
         
-        if not email_excel:
-            messages.error(request, "Please choose the Email Excel file.")
-            return redirect("dashboard")
-        
-        
-
         if not excel_file:
             messages.error(request, "Please choose an Excel file.")
             return render(request, "dashboard.html", {"uploads": uploads,
@@ -475,31 +468,7 @@ def dashboard(request):
                 for student in valid_students:
                     student.upload = upload
                 Student.objects.bulk_create(valid_students, batch_size=500)
-                
-        # email Excel mail sending.
-                
-        email_df = pd.read_excel(email_excel)
-
-        email_df.columns = (email_df.columns.str.strip().str.lower())
-        
-        required = ["name", "email"]
-
-        missing = [c for c in required if c not in email_df.columns]
-
-        if missing:
-            messages.error(request,f"Missing columns in Email Excel: {', '.join(missing)}")
-            return redirect("dashboard")
-        recipients = []
-
-        for _, row in email_df.iterrows():
-
-            name = str(row["name"]).strip()
-            email = str(row["email"]).strip()
-
-            if name and email:
-                recipients.append({"name": name,"email": email})
-        
-        send_bulk_upload_email(request.user.email, upload.id)
+            
         
         # Send invalid records through email
         if invalid_rows:
@@ -808,62 +777,3 @@ def download_template(request):
 # CELERY_RESULT_BACKEND=rediss://default:gQAAAAAAAn2wAAIgcDFlMzliNDc4ODk5NDI0NWQ3YjlhNTY0YzdiOTUwMWE2Nw@sought-iguana-163248.upstash.io:6379/1
 
 
-@login_required(login_url="login")
-def send_bulk_email_view(request):
-
-    if request.method != "POST":
-        return redirect("dashboard")
-
-    email_excel = request.FILES.get("email_excel")
-    print(email_excel)
-    if not email_excel:
-        messages.error(request, "Please select an Excel file.")
-        return redirect("dashboard")
-
-    try:
-        df = pd.read_excel(email_excel)
-        print(df)
-    except Exception:
-        messages.error(request, "Unable to read the Excel file.")
-        return redirect("dashboard")
-
-    df.columns = (
-        df.columns
-        .str.strip()
-        .str.lower()
-    )
-
-    required_columns = ["name", "email"]
-
-    missing = [c for c in required_columns if c not in df.columns]
-
-    if missing:
-        messages.error(
-            request,
-            f"Missing columns: {', '.join(missing)}"
-        )
-        return redirect("dashboard")
-
-    recipients = []
-
-    for _, row in df.iterrows():
-
-        name = str(row["name"]).strip()
-        email = str(row["email"]).strip()
-
-        if name and email:
-            recipients.append({
-                "name": name,
-                "email": email,
-            })
-
-    if not recipients:
-        messages.error(request, "No valid recipients found.")
-        return redirect("dashboard")
-
-    
-    send_bulk_upload_email(recipients, upload_id=0)
-
-    messages.success(request, "Emails sent successfully.")
-
-    return redirect("dashboard")
